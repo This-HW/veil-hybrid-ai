@@ -1,0 +1,21 @@
+{
+  "name": "veil-hybrid-ai",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Veil — a privacy-first hybrid AI desk for confidential notes. On-device masking with Gemini Nano 4, cloud escalation only after redaction and human sign-off.",
+  "license": "Apache-2.0",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview --port 4173",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "firebase": "^13.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3",
+    "vite": "^5.4.10"
+  }
+}
