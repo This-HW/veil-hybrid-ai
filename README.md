@@ -93,9 +93,18 @@ warning that semantic masking is unavailable, and a mandatory human review befor
 
 ## Deploy
 
-`.github/workflows/deploy.yml` builds the app and publishes it to GitHub Pages. Add the
-`VITE_FIREBASE_*` values (and `VITE_RECAPTCHA_SITE_KEY`) as repository **secrets**; nothing
-secret lives in the repo.
+The live demo at **https://this-hw.github.io/veil-hybrid-ai/** is published from the `gh-pages`
+branch: `VITE_BASE=/veil-hybrid-ai/` plus the Firebase web config (and `VITE_RECAPTCHA_SITE_KEY`)
+are inlined at build time by `vite build`, and the contents of `dist/` (with an empty `.nojekyll`)
+are committed to `gh-pages`. GitHub Pages serves that branch as-is — no build runs on GitHub's
+side, so the repository needs no secrets.
+
+The same build is also expressible as a workflow: [`docs/ci/deploy-actions.yml`](docs/ci/deploy-actions.yml)
+is a ready GitHub Actions version (typecheck + `vite build` + `upload-pages-artifact`/`deploy-pages`).
+Copy it to `.github/workflows/deploy.yml`, add the `VITE_*` values as repository **secrets**, and
+switch Settings → Pages → Source to **GitHub Actions** if you would rather build on every push.
+Nothing secret lives in the repo either way; the site's only secret is the App Check debug token
+on localhost, which is never committed.
 
 ## Privacy notes (and honest limits)
 

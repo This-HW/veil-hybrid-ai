@@ -13,6 +13,8 @@ We would rather state this plainly than let a demo imply more than it shows.
 | Local restore | Answer arrives with `[PERSON_1]`-style tokens; `restore()` swaps them on the device | `7 real value(s) put back on this device` in the receipt |
 | Type safety and build | `npm run typecheck`, `npm run build` | clean |
 | Echo guard | Headless Chromium's stub Prompt API echoes its input; `looksLikeEcho()` rejects it | device-only mode reports `FAILED` with an explanation instead of printing the raw note |
+| Hosted build attestation (2026-11-26) | The deployed build at https://this-hw.github.io/veil-hybrid-ai/ ran the sample note through the privacy pass and the cloud lane in a browser, on the production origin | footer read `App Check: reCAPTCHA Enterprise`; stage log `cloud · in_cloud` in 2.4 s and 1.7 s; answer returned with placeholders and `7 real value(s) put back`; privacy receipt filled; **no console errors or warnings** |
+| Deployed links | `curl -o /dev/null -w %{http_code}` on the four URLs the Devpost entry cites | repository, `blob/main/LICENSE`, the Pages site, and the demo video all `200` |
 
 ## Not verified here
 
@@ -21,9 +23,9 @@ We would rather state this plainly than let a demo imply more than it shows.
   the stub (i.e. the failure path). On a machine with Nano, the same code paths call the real model;
   the API usage follows the documented hybrid guide (`initializeDeviceModel`, `ONLY_ON_DEVICE`,
   `responseConstraint`).
-* **Hosted build attestation.** The reCAPTCHA Enterprise site key is bound to the GitHub Pages
-  domain; until the site is deployed the production App Check path cannot be exercised from
-  another origin.
+* **A proper reCAPTCHA Enterprise score.** The hosted run proved that attestation is accepted
+  for the domain, but a single manual run says nothing about the risk score a real user's
+  session receives.
 
 ## Reproducing the on-device lane
 
