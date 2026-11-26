@@ -113,6 +113,13 @@ secret lives in the repo.
   the public Firebase JS SDK and no pre-existing code; all sample notes and people in them are
   fictional.
 
+
+## Verification
+
+[`docs/VERIFICATION.md`](docs/VERIFICATION.md) lists exactly what was exercised (the real cloud lane,
+App Check enforcement, the local restore) and what was not (Gemini Nano itself, because the build
+machine has no Nano model) — worth reading before judging the on-device claims.
+
 ## License
 
 Apache-2.0 — see [LICENSE](LICENSE).
