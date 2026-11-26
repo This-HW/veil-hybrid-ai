@@ -393,7 +393,8 @@ button.primary:disabled {
 
 .masked-wrap {
   flex: 1;
-  min-height: 150px;
+  min-height: 140px;
+  max-height: 320px;
   border: 1px dashed #2e4050;
   border-radius: var(--radius-sm);
   background: repeating-linear-gradient(
@@ -459,6 +460,8 @@ button.primary:disabled {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
+  max-height: 76px;
+  overflow: hidden;
 }
 
 .entity-chip {

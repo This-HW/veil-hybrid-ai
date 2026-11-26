@@ -8,7 +8,7 @@ interface ImportMetaEnv {
   readonly VITE_FIREBASE_STORAGE_BUCKET?: string;
   readonly VITE_FIREBASE_MESSAGING_SENDER_ID?: string;
   readonly VITE_FIREBASE_APP_ID?: string;
-  /** reCAPTCHA v3 site key registered for App Check (production/hosted builds). */
+  /** reCAPTCHA Enterprise site key registered for App Check (hosted builds). */
   readonly VITE_RECAPTCHA_SITE_KEY?: string;
 }
 

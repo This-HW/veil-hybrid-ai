@@ -31,18 +31,18 @@ const RULES: Rule[] = [
   { type: "IP", re: /\b(?:\d{1,3}\.){3}\d{1,3}\b/g },
   // Korean resident registration number / foreigner registration number
   { type: "GOV_ID", re: /\b\d{6}[-\s]?[1-8]\d{6}\b/g },
+  // Case / employee / account / ticket identifiers (before phone/card, which can swallow them)
+  { type: "RECORD_ID", re: /\b(?:ACCT|CASE|EMP|SW|TCK|TICKET)[-\s#]*[A-Z0-9][A-Z0-9-]{3,}/g },
+  { type: "RECORD_ID", re: /\b[A-Z]{2,5}-\d{4}-\d{3,5}\b/g },
   // Card numbers, with or without separators
   { type: "CARD", re: /\b(?:\d[ -]?){13,18}\d\b/g },
   // Korean / international phone numbers
   {
     type: "PHONE",
-    re: /(?:\+?82[-\s.]?)?0?(?:1[016789]|2|3[1-3]|4[1-4]|5[1-5]|6[1-5]|7[0-5])[-\s.]?\d{3,4}[-\s.]?\d{4}\b/g,
+    re: /(?:\+?82[-\s.]?)?0(?:1[016789]|2|3[1-3]|4[1-4]|5[1-5]|6[1-5]|7[0-5])[-\s.]?\d{3,4}[-\s.]?\d{4}\b/g,
   },
   // Bank / account style numbers
   { type: "ACCOUNT", re: /\b\d{3,6}-\d{2,6}-\d{4,8}\b/g },
-  // Case / employee / account / ticket identifiers
-  { type: "RECORD_ID", re: /\b(?:ACCT|CASE|EMP|SW|TCK|TICKET)[-\s#]*[A-Z0-9][A-Z0-9-]{3,}/g },
-  { type: "RECORD_ID", re: /\b[A-Z]{2,5}-\d{4}-\d{3,5}\b/g },
   // Birthday-like dates (identifying in case notes)
   { type: "DATE", re: /\b(?:19|20)\d{2}[-./년]\s?\d{1,2}[-./월]\s?\d{1,2}일?\b/g },
   // Money tied to a person (rent arrears, severance, plan price)
@@ -59,6 +59,13 @@ const RULES: Rule[] = [
   {
     type: "PERSON",
     re: /\b(?:Client|Employee|Patient|Applicant|Claimant|Contact|Name|Landlord|Manager|Tenant)\s*[:=]\s*([A-Z][a-z]+(?:\s[A-Z][a-z]+){0,2})/g,
+    group: 1,
+  },
+  // Honorifics and role prefixes that carry a name in case notes
+  { type: "PERSON", re: /\b(?:Mr|Mrs|Ms|Miss|Dr|Prof)\.?\s+([A-Z][a-z]+)/g, group: 1 },
+  {
+    type: "PERSON",
+    re: /\b(?:worker|manager|landlord|agent|nurse|doctor|officer|HRBP|counsellor|therapist|supervisor|teacher)\s+([A-Z][a-z]+\s[A-Z][a-z]+)/g,
     group: 1,
   },
 ];

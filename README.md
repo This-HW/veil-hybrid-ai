@@ -58,7 +58,7 @@ claims more privacy than actually happened.
 * `src/aiLogic.ts` — the models: scan model (`ONLY_ON_DEVICE` + `Schema`), answer models
   (`ONLY_ON_DEVICE` / `PREFER_IN_CLOUD`), device probe.
 * `src/mask.ts` — deterministic rules, placeholder merge, residual scan, restore.
-* `src/firebase.ts` — Firebase app + App Check (reCAPTCHA v3 in hosted builds, debug provider
+* `src/firebase.ts` — Firebase app + App Check (reCAPTCHA Enterprise / Fraud Defense in hosted builds, debug provider
   on localhost; the token is never committed).
 
 ---
@@ -78,7 +78,8 @@ Firebase setup (free Spark plan, no billing):
    required APIs and enforces App Check for AI Logic.
 3. **App Check**: on localhost the app prints a debug token in the browser console (and in the
    footer). Add it under *App Check → Apps → Manage debug tokens*. For a hosted build, register a
-   **reCAPTCHA v3** site key for your domain and set `VITE_RECAPTCHA_SITE_KEY`.
+   **reCAPTCHA Enterprise (Fraud Defense)** site key for your domain, register it under
+   *App Check → Apps → your web app → Fraud Defense*, and set `VITE_RECAPTCHA_SITE_KEY`.
 
 For the **on-device lane** (Chrome desktop 139+):
 
@@ -100,8 +101,9 @@ secret lives in the repo.
 
 * Raw notes never leave the browser: the scan step is `ONLY_ON_DEVICE`, and the send button only
   becomes active after the residual scan and the approval checkbox.
-* The Firebase web config is public by design; the Gemini API is protected by **App Check**
-  (enforced for AI Logic), and the hosted build attests with reCAPTCHA v3.
+* The Firebase web config is public by design. **App Check is enforced for AI Logic** (Firebase
+  enforced it project-wide on 2 Nov 2026), and the hosted build attests with **reCAPTCHA Enterprise
+  (Fraud Defense)** registered for its domain; localhost uses the debug provider.
 * Notes and answers are **not persisted** — the app stores only aggregate counters in
   `localStorage` (runs, device share, entities hidden).
 * Limits: the rule pass cannot recognise unlabelled human names, which is exactly why the

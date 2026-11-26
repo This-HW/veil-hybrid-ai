@@ -37,6 +37,28 @@ export interface Prepared {
 
 const MAX_DEVICE_CHARS = 3500;
 
+/**
+ * Some Chromium builds ship a *stub* Prompt API that simply echoes the prompt
+ * back ("On-device model is not available in Chromium, this API is just echoing
+ * back the input"). Accepting that output would show the raw note in the answer
+ * panel and would make the privacy claims false, so an echoing response counts
+ * as "no usable on-device model".
+ */
+function looksLikeEcho(output: string, prompt: string): boolean {
+  const norm = (value: string) => value.replace(/\s+/g, " ").trim().toLowerCase();
+  const answer = norm(output);
+  const source = norm(prompt);
+  if (answer.length < 24) return false;
+  if (source.includes(answer) && answer.length > 60) return true;
+  const opening = answer.slice(0, 120);
+  if (opening.length > 40 && source.includes(opening)) return true;
+  // The stub prefixes its own notice, so also look for the prompt *inside* the
+  // answer: a slice taken from the body of the note is distinctive enough.
+  const from = Math.min(80, Math.max(0, source.length - 300));
+  const probe = source.slice(from, from + 160);
+  return probe.length > 60 && answer.includes(probe);
+}
+
 function now(): number {
   return typeof performance !== "undefined" ? performance.now() : Date.now();
 }
@@ -86,6 +108,9 @@ export async function prepare(note: string, task: string, options: PrepareOption
       await model.initializeDeviceModel();
       const result = await model.generateContent(scanPrompt(ruleResult.masked, task));
       const parsed = parseScan(result.response.text());
+      if (looksLikeEcho(result.response.text(), scanPrompt(ruleResult.masked, task))) {
+        throw new Error("the browser's Prompt API echoed the prompt — no real on-device model");
+      }
       deviceValues.push(...parsed.entities);
       localSufficient = parsed.localSufficient;
       reason = parsed.reason;
@@ -240,6 +265,19 @@ export async function answer(
     } else {
       throw error;
     }
+  }
+
+  // Never show an echoed prompt as an on-device answer.
+  if (looksLikeEcho(result.text, answerPrompt(prepared.masked, prepared.task))) {
+    track({
+      label: "On-device answer",
+      source: "on-device",
+      ms: 0,
+      detail: "rejected: the browser's Prompt API echoed the prompt",
+    });
+    throw new Error(
+      "The on-device model in this browser is a stub that echoes its input, so Veil will not use its output. Use Chrome desktop 139+ with the Gemini Nano model downloaded, or leave device-only mode off.",
+    );
   }
 
   const restoreStart = now();

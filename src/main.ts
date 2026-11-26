@@ -273,6 +273,11 @@ async function runPrivacyPass(): Promise<void> {
     });
     prepared = result;
 
+    if (result.deviceScan === "failed") {
+      deviceChip.classList.remove("ready");
+      deviceChip.classList.add("off");
+      deviceLabel.textContent = "On-device model unusable in this browser";
+    }
     renderMasked(result.masked, result.entities);
     renderEntities(result.entities);
     receiptMini.hidden = false;
@@ -376,7 +381,7 @@ function boot(): void {
   void showDeviceStatus();
 
   footerMode.textContent = isFirebaseConfigured
-    ? `cloud: ${CLOUD_MODEL} · App Check: ${recaptchaSiteKey ? "reCAPTCHA v3" : `debug ${getActiveDebugToken().slice(0, 8) || "—"}`}`
+    ? `cloud: ${CLOUD_MODEL} · App Check: ${recaptchaSiteKey ? "reCAPTCHA Enterprise" : `debug ${getActiveDebugToken().slice(0, 8) || "—"}`}`
     : "Firebase not configured";
 
   approveBox.addEventListener("change", () => {

@@ -2,7 +2,7 @@ import { initializeApp, type FirebaseApp } from "firebase/app";
 import {
   CustomProvider,
   initializeAppCheck,
-  ReCaptchaV3Provider,
+  ReCaptchaEnterpriseProvider,
   type AppCheck,
 } from "firebase/app-check";
 import { getAI, GoogleAIBackend, type AI } from "firebase/ai";
@@ -68,14 +68,16 @@ export function getFirebaseApp(): FirebaseApp {
 
   app = initializeApp(firebaseConfig);
 
-  // AI Logic requires App Check. A hosted build attests with reCAPTCHA v3;
+  // AI Logic requires App Check. A hosted build attests with reCAPTCHA Enterprise (Fraud Defense);
   // locally we use the documented App Check debug provider and show the token
   // so it can be allow-listed in the Firebase console.
   const globals = self as unknown as { FIREBASE_APPCHECK_DEBUG_TOKEN?: string | boolean };
-  let provider: ReCaptchaV3Provider | CustomProvider;
+  let provider: ReCaptchaEnterpriseProvider | CustomProvider;
 
   if (recaptchaSiteKey) {
-    provider = new ReCaptchaV3Provider(recaptchaSiteKey);
+    // App Check attests with reCAPTCHA Enterprise ("Fraud Defense") in the
+    // Firebase console; the site key is public, the secret never reaches the app.
+    provider = new ReCaptchaEnterpriseProvider(recaptchaSiteKey);
   } else {
     activeDebugToken = ensureDebugToken();
     globals.FIREBASE_APPCHECK_DEBUG_TOKEN = activeDebugToken;
