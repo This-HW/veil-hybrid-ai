@@ -59,6 +59,18 @@ function looksLikeEcho(output: string, prompt: string): boolean {
   return probe.length > 60 && answer.includes(probe);
 }
 
+function withTimeout<T>(work: Promise<T>, ms: number, label: string): Promise<T> {
+  return Promise.race([
+    work,
+    new Promise<T>((_, reject) =>
+      setTimeout(
+        () => reject(new Error(`${label} did not finish in ${Math.round(ms / 1000)}s — the on-device model may still be downloading`)),
+        ms,
+      ),
+    ),
+  ]);
+}
+
 function now(): number {
   return typeof performance !== "undefined" ? performance.now() : Date.now();
 }
@@ -105,8 +117,16 @@ export async function prepare(note: string, task: string, options: PrepareOption
     const scanStart = now();
     try {
       const model = createScanModel();
-      await model.initializeDeviceModel();
-      const result = await model.generateContent(scanPrompt(ruleResult.masked, task));
+      // Never let a first-run model download hold the UI: if Nano is not ready
+      // within a few seconds we degrade honestly instead of hanging.
+      const result = await withTimeout(
+        (async () => {
+          await model.initializeDeviceModel();
+          return model.generateContent(scanPrompt(ruleResult.masked, task));
+        })(),
+        8000,
+        "The on-device privacy scan",
+      );
       const parsed = parseScan(result.response.text());
       if (looksLikeEcho(result.response.text(), scanPrompt(ruleResult.masked, task))) {
         throw new Error("the browser's Prompt API echoed the prompt — no real on-device model");
@@ -227,8 +247,14 @@ export async function answer(
   const run = async (lane: Lane): Promise<{ text: string; source: "on-device" | "cloud" }> => {
     const start = now();
     const model = createAnswerModel(lane);
-    if (lane === "device") await model.initializeDeviceModel();
-    const stream = await model.generateContentStream(answerPrompt(prepared.masked, prepared.task));
+    const stream = await withTimeout(
+      (async () => {
+        if (lane === "device") await model.initializeDeviceModel();
+        return model.generateContentStream(answerPrompt(prepared.masked, prepared.task));
+      })(),
+      lane === "device" ? 20000 : 60000,
+      lane === "device" ? "The on-device answer" : "The cloud answer",
+    );
     let text = "";
     for await (const chunk of stream.stream) {
       const delta = chunk.text();
